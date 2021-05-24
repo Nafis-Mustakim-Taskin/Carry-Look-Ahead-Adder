@@ -1,11 +1,11 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
+// Company: Teton Pvt. Limited
 // Engineer: Nafis Mustakim
 // 
-// Create Date: 05/09/2021 05:44:30 PM
-// Design Name: 
-// Module Name: fa_csa
+// Create Date: 05/04/2021 11:09:29 PM
+// Design Name: Carry Look Ahead Adder
+// Module Name: carry_look_ahead_adder
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,16 +20,35 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module fa_csa(
-    input a,
-    input b,
-    input c_in,
-    output sum,
-    output c_output
+module carry_look_ahead_adder(
+    input [3:0] A,
+    input [3:0] B,
+    input cinput,
+    output [3:0] Sum,
+    output Cout
     );
-    wire p,g;
-    assign p = a ^ b;
-    assign g = a & b;
-    assign sum = p ^ c_in;
-    assign c_output = (p & c_in) | g;
+    wire [3:0]P;
+    wire [3:0]G;
+    wire [3:0]C;
+    wire Cin;
+    assign Cin = cinput; 
+    genvar i;
+    generate
+    for (i=0; i<4; i = i+1) 
+    begin
+    assign G[i] = A[i] & B[i];
+    assign P[i] = (A[i] ^ B[i]);
+    if (i==0)
+        begin
+            assign Sum[i] = P[i] ^ Cin;
+            assign C[i] = G[i] | (P[i] & Cin);     
+        end
+    else
+        begin
+            assign Sum[i] = P[i] ^ C[i-1];
+            assign C[i] = G[i] | (P[i] & C[i-1]);   
+        end
+    end
+    endgenerate
+    assign Cout = C[3];
 endmodule
